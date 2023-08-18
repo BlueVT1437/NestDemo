@@ -2,19 +2,22 @@ import { UserModule } from './users/user.module';
 import {
   Module,
   NestModule,
-  MiddlewareConsumer,
-  RequestMethod,
+  MiddlewareConsumer
 } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from 'dotenv';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TodosModule } from './todos/todos.module';
 import { Todo } from './todos/todos.entity';
-import { AuthModule } from './auth/auth.module';
 import { User } from './auth/auth.entity';
 import middeware1 from './middlewares/middeware1';
 import { Role } from './roles/role.entity';
 import { RoleModule } from './roles/role.module';
+import { KafkaModule } from './kafka/kafka.module';
+import { AppService } from './app.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AppController } from './app.controller';
+import { AuthModule } from './auth/auth.module';
 
 config();
 
@@ -38,10 +41,27 @@ config();
     }),
     AuthModule,
     RoleModule,
-		UserModule
+		UserModule,
+		KafkaModule,
+		ClientsModule.register([
+      {
+        name: 'AUTH_MICROSERVICE',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            clientId: 'auth',
+            brokers: ['localhost:9092'],
+          },
+          producerOnlyMode: true,
+          consumer: {
+            groupId: 'auth-consumer',
+          },
+        },
+      },
+    ]),
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService,],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -1,4 +1,4 @@
-import { CreateUserEvent } from './../../../google-login/src/test/create-user.event';
+// import { CreateUserEvent } from './../../../google-login/src/test/create-user.event';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/auth/auth.entity';
@@ -41,7 +41,7 @@ export class UserService {
     return await this.userRepository.save(todo);
   }
 
-  handleUserCreated(data: CreateUserEvent) {
-    console.log('communicate', data);
-  }
+  // handleUserCreated(data: CreateUserEvent) {
+  //   console.log('communicate', data);
+  // }
 }

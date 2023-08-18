@@ -19,7 +19,7 @@ export class User {
   email: string;
 
   @Column()
-  password: string;
+  password?: string;
 
   @ManyToMany(() => Role, (role) => role.user)
   @JoinTable({
