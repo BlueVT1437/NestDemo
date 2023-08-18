@@ -8,6 +8,7 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
 import { Role } from 'src/roles/role.entity';
 import { GoogleStrategy } from './google.stragedy';
+import { ProducerService } from 'src/kafka/producer.service';
 
 @Module({
   imports: [
@@ -17,10 +18,10 @@ import { GoogleStrategy } from './google.stragedy';
       secret: 'gicungduoc',
       signOptions: { expiresIn: '3000s' },
     }),
-		PassportModule
+		PassportModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, GoogleStrategy],
+  providers: [AuthService, LocalStrategy, GoogleStrategy, ProducerService],
 	exports: [LocalStrategy]
 })
 export class AuthModule {}
