@@ -7,30 +7,24 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity({ name: 'users' })
-export class User {
+@Entity({ name: 'permissions' })
+export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string;
+  @Column({ unique: true })
+  permission: string;
 
-  @Column()
-  email: string;
-
-  @Column()
-  password?: string;
-
-  @ManyToMany(() => Role, (role) => role.user)
+  @ManyToMany(() => Role, (role) => role.permissions)
   @JoinTable({
-    name: 'user_role',
+    name: 'role_permissions',
     joinColumn: {
-      name: 'user_id',
+      name: 'permission_id',
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
       name: 'role_id',
     },
   })
-  role?: Role[];
+  roles?: Role[];
 }

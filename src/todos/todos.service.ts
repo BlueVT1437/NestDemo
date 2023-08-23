@@ -1,14 +1,24 @@
-import { Injectable, UseGuards } from '@nestjs/common';
+import { Injectable, UseGuards, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Todo } from './todos.entity';
 import { Repository } from 'typeorm';
 import { CreateTodoDto } from './dtos/create-todo.dto';
+import { Permission } from 'src/permissions/permission.entity';
 
 @Injectable()
 export class TodosService {
   constructor(
     @InjectRepository(Todo) private readonly todoRepository: Repository<Todo>,
+    @InjectRepository(Permission) private readonly permissionRepository: Repository<Permission>,
   ) {}
+
+  // async onModuleInit() {
+  //   const todo = await this.permissionRepository.create({
+  //     permission: 'ABLE_TO_GET_TODO',
+  //   });
+
+  //   await this.permissionRepository.save(todo);
+  // }
 
   async create(dto: CreateTodoDto) {
     const todo = await this.todoRepository.create(dto);
@@ -32,7 +42,7 @@ export class TodosService {
     return await this.todoRepository.save(todo);
   }
 
-	async delete(id: number) {
+  async delete(id: number) {
     const todo = await this.todoRepository.findOne({ where: { id } });
 
     return await this.todoRepository.remove(todo);

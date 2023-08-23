@@ -19,7 +19,7 @@ export class LoginDto {
   @IsNotEmpty({ message: 'This field must be input' })
   email: string;
 
-  @IsNotEmpty({ message: 'This field must be input' })
+  @IsOptional()
   @MinLength(5, { message: 'Password must be longer than 5 characters' })
   password: string;
 }
