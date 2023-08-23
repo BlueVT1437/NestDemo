@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
   HttpException,
   HttpStatus,
-	Inject
+  Inject,
 } from '@nestjs/common';
 import { User } from './auth.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -20,8 +20,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
-		@Inject('AUTH_MICROSERVICE') private readonly authClient: ClientKafka,
-    // private readonly producerService: ProducerService,
+    // @Inject('AUTH_MICROSERVICE') private readonly authClient: ClientKafka,
+    private readonly producerService: ProducerService,
     private jwtService: JwtService,
   ) {}
 
@@ -72,12 +72,20 @@ export class AuthService {
   }
 
   async signIn({ email, password }: LoginDto) {
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({
+      where: { email },
+      relations: {
+        role: {
+          permissions: true,
+        },
+      },
+    });
 
     if (user?.password !== password) {
       throw new UnauthorizedException();
     }
-    const payload = { sub: user.name, username: user.email };
+
+    const payload = { sub: user.name, username: user.email, role: user.role };
     const access_token = await this.jwtService.signAsync(payload);
 
     return access_token;
@@ -114,17 +122,16 @@ export class AuthService {
     const payload = { sub: userInfo.name, username: userInfo.email };
     const access_token = await this.jwtService.signAsync(payload);
 
-		// console.log('access_token', access_token);
-    // await this.producerService.produce({
-    //   topic: 'token',
-    //   messages: [
-    //     {
-    //       value: access_token,
-    //     },
-    //   ],
-    // });
+    await this.producerService.produce({
+      topic: 'token',
+      messages: [
+        {
+          value: access_token + '-' + userInfo.name + '-' + userInfo.email,
+        },
+      ],
+    });
 
-		this.authClient.emit('token', access_token);
+    // this.authClient.emit('token', access_token);
     return access_token;
   }
 }

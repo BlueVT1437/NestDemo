@@ -6,6 +6,7 @@ import {
   Post,
   Put,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto, LoginDto } from 'src/dto/user.dto';
@@ -34,7 +35,8 @@ export class AuthController {
 
   @Get('redirect')
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req) {
-    return this.authService.googleLogin(req);
+  async googleAuthRedirect(@Req() req, @Res() res) {
+    const accessToken = await this.authService.googleLogin(req);
+		res.redirect(`http://localhost:3001/auth?accessToken=${accessToken}`);
   }
 }

@@ -1,5 +1,7 @@
+import { Roles } from 'src/roles/roles.decorator';
 import { CreateTodoDto } from './dtos/create-todo.dto';
 import { TodosService } from './todos.service';
+import { Permissions } from 'src/permissions/permisstion.decorator';
 import {
   Body,
   Controller,
@@ -9,24 +11,31 @@ import {
   Param,
   Delete,
 	UseGuards,
+	SetMetadata,
 } from '@nestjs/common';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
+import { RolesGuard } from 'src/roles/roles.guard';
 
+@UseGuards(LocalAuthGuard)
 @Controller('todos')
 export class TodosController {
   constructor(private readonly todosService: TodosService) {}
 
+	@UseGuards(RolesGuard)
+	@Roles('Admin')
+	// @Permissions('ABLE_TO_CREATE_TODO')
   @Post()
   create(@Body() dto: CreateTodoDto) {
     return this.todosService.create(dto);
   }
 
-	@UseGuards(LocalAuthGuard)
+	@Permissions('ABLE_TO_GET_TODO')
   @Get()
   getAll() {
     return this.todosService.getAll();
   }
 
+	@Roles('User')
   @Get(':id')
   getDetail(@Param('id') id: number) {
     return this.todosService.getDetail(id);
@@ -42,3 +51,5 @@ export class TodosController {
     return this.todosService.delete(id);
   }
 }
+
+// ROLES -> PERMISSION [CREATE, GET]
