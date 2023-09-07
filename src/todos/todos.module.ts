@@ -12,7 +12,6 @@ import { Permission } from 'src/permissions/permission.entity';
     TypeOrmModule.forFeature([Todo, Permission]),
     PassportModule.register({
       defaultStrategy: 'jwt',
-      property: 'todos2222',
       session: false,
     }),
 		PermissionModule

@@ -16,8 +16,8 @@ import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { PermissionModule } from './permissions/permission.module';
 import { Permission } from './permissions/permission.entity';
-import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from './roles/roles.guard';
+// import { APP_GUARD } from '@nestjs/core';
+// import { RolesGuard } from './roles/roles.guard';
 
 config();
 
@@ -47,17 +47,11 @@ config();
     // ClientsModule.register([
     //   {
     //     name: 'AUTH_MICROSERVICE',
-    //     transport: Transport.KAFKA,
+    //     transport: Transport.TCP,
     //     options: {
-    //       client: {
-    //         clientId: 'auth',
-    //         brokers: ['localhost:9092'],
-    //       },
-    //       producerOnlyMode: true,
-    //       consumer: {
-    //         groupId: 'auth-consumer',
-    //       },
-    //     },
+    //       host: "127.0.0.1",
+    //       port: 8888
+    //     }
     //   },
     // ]),
   ],

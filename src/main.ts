@@ -10,23 +10,20 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 config();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  // const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-  //   AppModule,
-  //   {
-  //     transport: Transport.KAFKA,
-	// 		options: {
-  //       client: {
-  //         brokers: ['localhost:9092'],
-  //       },
-  //       consumer: {
-  //         groupId: 'auth-consumer',
-  //       },
-  //     },
-  //   },
-  // );
-  app.useGlobalPipes(new ValidationPipe());
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+  });
+  app.enableCors();
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.TCP,
+    options: {
+      host: '127.0.0.1',
+      port: 8889,
+    },
+  });
+  // app.useGlobalPipes(new ValidationPipe());
   app.use(middeware1);
+  await app.startAllMicroservices();
   await app.listen(3000);
 
   if (module.hot) {

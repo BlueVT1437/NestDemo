@@ -13,7 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { isEmpty } from 'class-validator';
 import { Role } from 'src/roles/role.entity';
-import { ClientKafka } from '@nestjs/microservices';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -59,11 +59,14 @@ export class AuthService {
         }
       }
 
+      const saltOrRounds = 10;
+      const hashPassword = await bcrypt.hash(user.password, saltOrRounds);
       const userInfo = {
         name: user.name,
         email: user.email,
-        password: user.password,
+        password: hashPassword,
         role: existedRoleList,
+        status: true,
       };
       const newUser = this.userRepository.create(userInfo);
 
@@ -81,14 +84,29 @@ export class AuthService {
       },
     });
 
-    if (user?.password !== password) {
-      throw new UnauthorizedException();
+    try {
+      const isMatch = bcrypt.compareSync(password, user?.password);
+
+      if (!isMatch || !user.status) {
+        throw new UnauthorizedException();
+      }
+      const payload = { sub: user.name, username: user.email, role: user.role };
+      const access_token = await this.jwtService.signAsync(payload);
+
+      return { access_token, user };
+    } catch (err) {
+      // console.log(`Error is: ${err}`);
+      throw new HttpException(
+        {
+          status: HttpStatus.UNAUTHORIZED,
+          error: 'Please check your email or password!',
+        },
+        HttpStatus.UNAUTHORIZED,
+        {
+          cause: err,
+        },
+      );
     }
-
-    const payload = { sub: user.name, username: user.email, role: user.role };
-    const access_token = await this.jwtService.signAsync(payload);
-
-    return access_token;
   }
 
   async googleLogin(req) {
@@ -102,12 +120,12 @@ export class AuthService {
       password: '',
     };
 
-    const existedUser = this.userRepository.findOne({
+    const existedUser = await this.userRepository.findOne({
       where: { email: userInfo.email },
     });
 
     if (isEmpty(existedUser)) {
-      const newUser = this.userRepository.create({
+      const newUser = await this.userRepository.create({
         ...userInfo,
         role: [
           {
@@ -126,12 +144,16 @@ export class AuthService {
       topic: 'token',
       messages: [
         {
-          value: access_token + '-' + userInfo.name + '-' + userInfo.email,
+          value: JSON.stringify({
+            token: access_token,
+            name: userInfo.name,
+            email: userInfo.email,
+          }),
         },
       ],
     });
 
     // this.authClient.emit('token', access_token);
-    return access_token;
+    return { access_token, user: userInfo };
   }
 }

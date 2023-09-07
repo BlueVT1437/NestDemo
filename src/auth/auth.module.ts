@@ -22,6 +22,6 @@ import { ProducerService } from 'src/kafka/producer.service';
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, GoogleStrategy, ProducerService],
-	exports: [LocalStrategy]
+	exports: [LocalStrategy, AuthService]
 })
 export class AuthModule {}

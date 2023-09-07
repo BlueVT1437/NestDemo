@@ -21,6 +21,9 @@ export class User {
   @Column()
   password?: string;
 
+  @Column()
+  status?: boolean;
+
   @ManyToMany(() => Role, (role) => role.user)
   @JoinTable({
     name: 'user_role',

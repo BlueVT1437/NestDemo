@@ -3,27 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Todo } from './todos.entity';
 import { Repository } from 'typeorm';
 import { CreateTodoDto } from './dtos/create-todo.dto';
-import { Permission } from 'src/permissions/permission.entity';
 
 @Injectable()
 export class TodosService {
   constructor(
-    @InjectRepository(Todo) private readonly todoRepository: Repository<Todo>,
-    @InjectRepository(Permission) private readonly permissionRepository: Repository<Permission>,
+    @InjectRepository(Todo) private readonly todoRepository: Repository<Todo>, // @InjectRepository(Permission) private readonly permissionRepository: Repository<Permission>,
   ) {}
-
-  // async onModuleInit() {
-  //   const todo = await this.permissionRepository.create({
-  //     permission: 'ABLE_TO_GET_TODO',
-  //   });
-
-  //   await this.permissionRepository.save(todo);
-  // }
 
   async create(dto: CreateTodoDto) {
     const todo = await this.todoRepository.create(dto);
-
-    return await this.todoRepository.save(todo);
+		await this.todoRepository.save(todo)
+    return { message: 'Created successfully!' };
   }
 
   async getAll() {
@@ -38,13 +28,14 @@ export class TodosService {
     const todo = await this.todoRepository.findOne({ where: { id } });
 
     Object.assign(todo, dto);
-
-    return await this.todoRepository.save(todo);
+    await this.todoRepository.save(todo);
+    return { message: 'Updated successfully!' };
   }
 
   async delete(id: number) {
     const todo = await this.todoRepository.findOne({ where: { id } });
+    await this.todoRepository.remove(todo);
 
-    return await this.todoRepository.remove(todo);
+    return { message: 'Deleted successfully!' };
   }
 }

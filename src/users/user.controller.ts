@@ -2,7 +2,11 @@ import { EventPattern } from '@nestjs/microservices';
 import { UserService } from './user.service';
 import { Body, Controller, Get, Param, Put } from '@nestjs/common';
 // import { CreateUserEvent } from '../../../google-login/src/test/create-user.event';
-import { CreateUserDto } from 'src/dto/user.dto';
+import {
+  CreateUserDto,
+  UpdatePasswordDto,
+  UpdateStatusAccountDto,
+} from 'src/dto/user.dto';
 
 @Controller('user')
 export class UserController {
@@ -13,13 +17,23 @@ export class UserController {
     return this.userService.getUsers();
   }
 
+  @Get(':id')
+  getUserById(@Param('id') id: number) {
+    return this.userService.getUserById(id);
+  }
+
   @Put(':id')
   update(@Param('id') id: number, @Body() dto: CreateUserDto) {
     return this.userService.updateUser(dto, id);
   }
 
-  // @EventPattern('mail_created')
-  // handleUserCreated(data: CreateUserEvent) {
-  //   this.userService.handleUserCreated(data);
-  // }
+  @Put('/password/:id')
+  updatePassword(@Param('id') id: number, @Body() dto: UpdatePasswordDto) {
+    return this.userService.updatePassword(id, dto.password);
+  }
+
+  @Put('/delete/:id')
+  deleteUser(@Param('id') id: number, @Body() body: UpdateStatusAccountDto) {
+    return this.userService.deleteUser(id, body.isActive);
+  }
 }

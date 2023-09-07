@@ -27,7 +27,8 @@ export class RolesGuard implements CanActivate {
     condition = userRole.some((itemRole) =>
       rolesContext.includes(itemRole.role),
     );
-    if (!condition) {
+
+    if (!condition && permissionsContext) {
       const userPermission = [];
       userRole.forEach((item) => {
         item.permissions.forEach((itemPermission) => {
